@@ -1,0 +1,202 @@
+﻿@model frontend.Models.Mmovimiento
+
+@{
+    ViewData["Title"] = "Compras";
+}
+
+<br />
+<h2 class="text-center">Ingreso de Compras</h2>
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        <form>
+            <div class="alert alert-danger" id="validacion" role="alert" style="display: none;">
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="idCliente" class="form-label">Nombres:</label>
+                    <select id="idCliente" name="idCliente" class="form-control" onchange="datosCliente()">
+                        <option value=0>--Elija un cliente--</option>
+                        @foreach (var item in ViewData["clientesList"] as List<Mclientes>)
+                        {
+                            <option value="@item.idCliente">@item.nombre @item.apellido</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="idTarjeta" class="form-label">Numero de tarjeta:</label>
+                    <select id="idTarjeta" name="idTarjeta" class="form-control" onchange="datosTarjeta()">
+                        <option value=0>--Elija una tarjeta--</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="dui" class="form-label">Dui:</label>
+                    <input type="text" class="form-control" id="dui" name="dui" readonly>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="telefono" class="form-label">Telefono:</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" readonly>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="text" class="form-control" id="email" name="email" readonly>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="tipo" class="form-label">Tipo de tarjeta:</label>
+                    <input type="text" class="form-control" id="tipo" name="tipo" readonly>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="fechaExpira" class="form-label">Fecha de expiracion:</label>
+                    <input type="text" class="form-control" id="fechaExpira" name="fechaExpira" readonly>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="saldoActual" class="form-label">Saldo actual:</label>
+                    <input type="text" class="form-control" id="saldoActual" name="saldoActual" readonly>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="saldoDisponible" class="form-label">Saldo disponible:</label>
+                    <input type="text" class="form-control" id="saldoDisponible" name="saldoDisponible" readonly>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="monto" class="form-label">monto de compra:</label>
+                    <input type="number" class="form-control" id="monto" name="monto">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="fechaCompra" class="form-label">Fecha de compra:</label>
+                    <input type="date" class="form-control" id="fechaCompra" name="fechaCompra">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="descripcion" class="form-label">Descripcion:</label>
+                    <textarea type="text" class="form-control" id="descripcion" name="descripcion" required></textarea>
+                </div>
+            </div>
+
+            <br />
+            <div class="row">
+                <div class="col-md-6">
+                    <a onclick="insertCompra();" class="btn btn-outline-primary"><i class="bi bi-cart-plus"></i> Realizar compra</a>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function datosCliente() {
+        idCliente = $("#idCliente").val();
+        if (idCliente != 0) {
+            data = @Html.Raw(Json.Serialize(ViewData["clientesList"]));
+            for (var i = 0; i < data.length; i++) {
+                if (idCliente == data[i].idCliente) {
+                    $('[name="dui"]').val(data[i].dui);
+                    $('[name="telefono"]').val(data[i].telefono);
+                    $('[name="email"]').val(data[i].email);
+                }
+            }
+            tarjetas = @Html.Raw(Json.Serialize(ViewData["tarjetasList"]));
+            $('#idTarjeta').empty();
+            $('#idTarjeta').append("<option value=0>--Elija una tarjeta--</option>");
+            for (var i = 0; i < tarjetas.length; i++) {
+                if (idCliente == data[i].idCliente) {
+                    $('#idTarjeta').append("<option value=" + tarjetas[i].idTarjeta + ">" + tarjetas[i].numeroTarjeta + "</option>");
+                }
+            }
+        } else {
+            $('[name="dui"]').val("");
+            $('[name="telefono"]').val("");
+            $('[name="email"]').val("");
+
+            $('[name="tipo"]').val("");
+            $('[name="fechaExpira"]').val("");
+            $('[name="saldoActual"]').val("");
+            $('[name="saldoDisponible"]').val("");
+        }
+    }
+
+    function datosTarjeta() {
+        idTarjeta = $("#idTarjeta").val();
+        if (idTarjeta != 0) {
+            tarjetas = @Html.Raw(Json.Serialize(ViewData["tarjetasList"]));
+            for (var i = 0; i < tarjetas.length; i++) {
+                if (idTarjeta == tarjetas[i].idTarjeta) {
+                    $('[name="tipo"]').val(tarjetas[i].tipo);
+                    $('[name="fechaExpira"]').val(tarjetas[i].fechaExpira);
+                    $('[name="saldoActual"]').val("$ " + tarjetas[i].saldoActual);
+                    $('[name="saldoDisponible"]').val("$ " + tarjetas[i].saldoDisponible);
+                }
+            }
+        } else {
+            $('[name="tipo"]').val("");
+            $('[name="fechaExpira"]').val("");
+            $('[name="saldoActual"]').val("");
+            $('[name="saldoDisponible"]').val("");
+        }
+    }
+
+    function insertCompra() {
+        data = {
+            "idTarjeta": $("#idTarjeta").val(),
+            "monto": $("#monto").val(),
+            "fechaCompra": $("#fechaCompra").val(),
+            "descripcion": $("#descripcion").val(),
+        };
+
+        $.ajax({
+            url: "@Url.Action("ingresarCompras","Movimiento")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data[1])
+                if (data[1] == "") {
+                    document.getElementById('validacion').innerHTML = "";
+                    $("#validacion").hide();
+                    $('[name="monto"]').val("");
+                    $('[name="fechaCompra"]').val("");
+
+                    Swal.fire(
+                        'Ingreso de compra!',
+                        data[0],
+                        'success'
+                    ).then(() => { location.reload(); });
+                } else {
+                    document.getElementById('validacion').innerHTML = data[1];
+                    $("#validacion").show();
+                }
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    }
+</script> 

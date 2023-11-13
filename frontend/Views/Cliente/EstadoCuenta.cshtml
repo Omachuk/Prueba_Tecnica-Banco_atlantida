@@ -1,0 +1,242 @@
+﻿
+@{
+    ViewData["Title"] = "Estado de cuenta";
+}
+
+@{
+    var cuentaList = ViewData["clientesList"] as List<Mclientes>; // Asegúrate de reemplazar "Cliente" con el nombre de tu modelo
+    string nombre = string.Empty;
+    string apellido = string.Empty;
+    string dui = string.Empty;
+    string telefono = string.Empty;
+    string email = string.Empty;
+    DateTime fecha = DateTime.Now;
+
+    if (cuentaList != null && cuentaList.Count > 0)
+    {
+        // Obtener el nombre del primer cliente en la lista (puedes cambiar el índice según tus necesidades)
+        nombre = cuentaList[0].nombre;
+        apellido = cuentaList[0].apellido;
+        dui = cuentaList[0].dui;
+        telefono = cuentaList[0].telefono;
+        email = cuentaList[0].email;
+        fecha = cuentaList[0].fechaNacimiento;
+    }
+}
+
+<br />
+<h2 class="text-center">Estado de cuenta</h2>
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-danger" id="validacion" role="alert" style="display: none;">
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="nombre" class="form-label">Nombres:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" value="@nombre" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="apellido" class="form-label">Apellido:</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" value="@apellido" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="dui" class="form-label">Dui:</label>
+                <input type="text" class="form-control" id="dui" name="dui" value="@dui" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="telefon" class="form-label">Telfono:</label>
+                <input type="text" class="form-control" id="telefon" name="telefon" value="@telefono" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="email" class="form-label">Email:</label>
+                <input type="text" class="form-control" id="email" name="email" value="@email" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="fechaNacimiento" class="form-label">Fecha nacimiento:</label>
+                <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" value="@fecha.ToString("yyyy-MM-dd")" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="idTarjeta" class="form-label">Numero de tarjeta:</label>
+                <select id="idTarjeta" name="idTarjeta" class="form-control" onchange="datosTarjeta()">
+                    <option value=0>--Elija un cliente--</option>
+                    @foreach (var item in ViewData["cuentaList"] as List<Mtarjeta>)
+                    {
+                        <option value="@item.idTarjeta">@item.numeroTarjeta</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="fechaExpira" class="form-label">Fecha de expiracion:</label>
+                <input type="text" class="form-control" id="fechaExpira" name="fechaExpira" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="saldoActual" class="form-label">Saldo actual:</label>
+                <input type="text" class="form-control" id="saldoActual" name="saldoActual" readonly>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="saldoDisponible" class="form-label">Saldo disponible:</label>
+                <input type="text" class="form-control" id="saldoDisponible" name="saldoDisponible" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="montoMaximo" class="form-label">Limite de credito:</label>
+                <input type="text" class="form-control" id="montoMaximo" name="montoMaximo" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="interesBonificable" class="form-label">Interes bonificable:</label>
+                <input type="text" class="form-control" id="interesBonificable" name="interesBonificable" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="cuotaMinima" class="form-label">Couta minima:</label>
+                <input type="text" class="form-control" id="cuotaMinima" name="cuotaMinima" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="montoPagar" class="form-label">Monto a pagar:</label>
+                <input type="text" class="form-control" id="montoPagar" name="montoPagar" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label for="saldoIntereses" class="form-label">Saldo con intereses:</label>
+                <input type="text" class="form-control" id="saldoIntereses" name="saldoIntereses" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <label for="totalMeses" class="form-label">Total de los ultimos 2 meses:</label>
+                <input type="text" class="form-control" id="totalMeses" name="totalMeses" readonly>
+            </div>
+        </div>
+
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-bordered table-hover" id="mydata">
+                    <thead>
+                        <tr>
+                            <th class="text-center">
+                                Numero de tarjeta
+                            </th>
+                            <th class="text-center">
+                                Monto
+                            </th>
+                            <th class="text-center">
+                                Fecha de compra
+                            </th>
+                            <th class="text-center">
+                                Descripcion
+                            </th>
+                            <th class="text-center">
+                                Tipo
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function datosTarjeta() {
+        idTarjeta = $("#idTarjeta").val();
+        if (idTarjeta != 0) {
+            data = @Html.Raw(Json.Serialize(ViewData["cuentaList"]));
+            for (var i = 0; i < data.length; i++) { 
+                if (idTarjeta == data[i].idTarjeta) {
+                    $('[name="fechaExpira"]').val(data[i].fechaExpira);
+                    $('[name="saldoActual"]').val("$" + data[i].saldoActual);
+                    $('[name="saldoDisponible"]').val("$" + data[i].saldoDisponible);
+                    $('[name="montoMaximo"]').val("$" + data[i].montoMaximo);
+                    $('[name="interesBonificable"]').val("$" + data[i].interesBonificable);
+                    $('[name="cuotaMinima"]').val("$" + data[i].cuotaMinima);
+                    $('[name="montoPagar"]').val("$" + data[i].saldoActual);
+                    $('[name="saldoIntereses"]').val("$" + data[i].saldoIntereses);
+                }
+            }
+            mostrarHistorial();
+        }else{
+            $('[name="fechaExpira"]').val("");
+            $('[name="saldoActual"]').val("");
+            $('[name="saldoDisponible"]').val("");
+            $('[name="montoMaximo"]').val("");
+            $('[name="interesBonificable"]').val("");
+            $('[name="cuotaMinima"]').val("");
+            $('[name="montoPagar"]').val("");
+            $('[name="saldoIntereses"]').val("");
+            $('[name="totalMeses"]').val("");
+            $('#mydata').dataTable().fnDestroy();
+            $('tbody').empty();
+        }
+    }
+
+    function mostrarHistorial() {
+        data = {
+            "idTarjeta": $("#idTarjeta").val(),
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("historialCompras","Movimiento")',
+            async: false,
+            dataType: 'JSON',
+            data: data,
+            success: function (data) {
+                console.log(data);
+                $('[name="totalMeses"]').val("$" + data[0]);
+                $('#mydata').dataTable().fnDestroy();
+                $('tbody').empty();
+
+                datos = JSON.parse(data[1]);
+                $.each(datos, function (key, registro) {
+                    if (registro.tipoMovimiento == 1) {
+                        tipoMovimiento = '<span class="badge rounded-pill bg-primary">Compra</span>';
+                    } else {
+                        tipoMovimiento = '<span class="badge rounded-pill bg-success">Pago</span>';
+                    }
+                    $('tbody').append(
+                        '<tr>' +
+                        '<td>' + registro.numeroTarjeta + '</td>' +
+                        '<td>$' + registro.monto + '</td>' +
+                        '<td>' + registro.fechaCompra.slice(0, 10) + '</td>' +
+                        '<td>' + registro.descripcion + '</td>' +
+                        '<td>' + tipoMovimiento + '</td>' +
+                        '</tr>'
+                    );
+                });
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+            }
+        });
+    }
+</script> 

@@ -1,0 +1,791 @@
+﻿@model IEnumerable<frontend.Models.Mclientes>
+
+@{
+    ViewData["Title"] = "Clientes";
+}
+<br />
+<h2 class="text-center">Clientes ingresados</h2>
+<br />
+
+<p>
+    <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#insertCliente">
+        <i class="bi bi-clipboard2-plus"></i> Ingresar nuevo cliente
+    </a>
+</p>
+<table class="table table-bordered table-hover" id="mydata">
+    <thead>
+        <tr>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.nombre)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.apellido)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.sexo)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.dui)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.telefono)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.email)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.cantidad)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.estado)
+            </th>
+            <th class="text-center">
+                Acción
+            </th>
+            <th class="text-center">
+                Cuenta
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in ViewData["clientesList"] as List<Mclientes>)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.apellido)
+            </td>
+            <td class="text-center">
+                @if (item.sexo == 0)
+                {
+                    <p>Mujer</p>
+                }
+                else if (item.sexo == 1)
+                {
+                    <p>Hombre</p>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.dui)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.telefono)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.email)
+                </td>
+            <td class="text-center">
+                <span class="badge rounded-pill bg-success">@Html.DisplayFor(modelItem => item.cantidad)</span>
+            </td>
+
+            <td class="text-center">
+                @if (item.estado == 0){
+                        <span class="badge rounded-pill bg-danger">Inactivo</span>
+                }
+                else if (item.estado == 1){
+                        <span class="badge rounded-pill bg-primary">Activo</span>
+                }
+            </td>
+            <td style="text-align:center;">
+                    <a data-toggle="modal" onClick="editar(@Html.DisplayFor(modelItem => item.idCliente))" class="btn btn-info btn-sm" id="">Editar</a>
+                    <a data-toggle="modal" onClick="asignar(@Html.DisplayFor(modelItem => item.idCliente))" class="btn btn-success btn-sm" data-codigo="">Asignar tarjeta</a>
+            </td>
+            <td class="text-center">
+                @if (item.cantidad == 0)
+                {
+                    <span class="badge rounded-pill bg-success">No posee tarjetas</span>
+                }
+                else if (item.cantidad >= 1)
+                {
+                        <a asp-action="estado" asp-route-id="@item.idCliente" class="btn btn-primary btn-sm">Cuenta</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div class="modal" id="insertCliente">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Ingresar nuevo cliente</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="clienteForm">
+                    <div class="mb-12">
+                        <div id="validacion" style="color:red"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="nombre" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="apellido" class="form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="sexo" class="form-label">Sexo:</label>
+                            <select class="form-control" id="sexo" name="sexo" required>
+                                <option value=0>Mujer</option>
+                                <option value=1>Hombre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fechaNacimiento" class="form-label">Fecha nacimiento:</label>
+                            <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="dui" class="form-label">DUI:</label>
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" placeholder="00000000" id="dui1" name="dui1" onkeypress="validarNum(event,'dui1',8)">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" placeholder="0" id="dui2" name="dui2" onkeypress="validarNum(event,'dui2',1)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="telefono" class="form-label">Telefono:</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" required onkeypress="validarNum(event,'telefono',8)">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="direccion" class="form-label">Direccion:</label>
+                            <textarea type="text" class="form-control" id="direccion" name="direccion" required></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="btnInsert">
+                    <i class="bi bi-person-plus"></i> Ingresar
+                 </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="editCliente">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Editar cliente</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="clienteForm">
+                    <div class="mb-12">
+                        <input type="hidden" name="id_edit" id="id_edit" class="form-control">
+                        <div id="validacion_edit" style="color:red"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="nombre_edit" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre_edit" name="nombre_edit" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="apellido_edit" class="form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="apellido_edit" name="apellido_edit" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="sexo_edit" class="form-label">Sexo:</label>
+                            <select class="form-control" id="sexo_edit" name="sexo_edit" required>
+                                <option value=0>Mujer</option>
+                                <option value=1>Hombre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fechaNacimiento_edit" class="form-label">Fecha nacimiento:</label>
+                            <input type="date" class="form-control" id="fechaNacimiento_edit" name="fechaNacimiento_edit" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="dui_edit" class="form-label">DUI:</label>
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" placeholder="00000000" id="dui1_edit" name="dui1_edit" onkeypress="validarNum(event,'dui1',8)">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" placeholder="0" id="dui2_edit" name="dui2_edit" onkeypress="validarNum(event,'dui2',1)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="telefono_edit" class="form-label">Telefono:</label>
+                            <input type="text" class="form-control" id="telefono_edit" name="telefono_edit" required onkeypress="validarNum(event,'telefono',8)">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="email_edit" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="email_edit" name="email_edit" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="direccion_edit" class="form-label">Direccion:</label>
+                            <textarea type="text" class="form-control" id="direccion_edit" name="direccion_edit" required></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-success" id="btnEdit" onClick="editarClientes();">
+                    <i class="bi bi-send-check"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="asignarTarjeta">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Asignacion de tarjeta</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="clienteForm">
+                    <div class="mb-3">
+                        <input type="hidden" name="id_asignar" id="id_asignar" class="form-control">
+                        <div id="validacion_asignar" style="color:red"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="tipotarjeta_asig" class="form-label">Tipo de tarjeta:</label>
+                            <select id="tipotarjeta_asig" name="tipotarjeta_asig" class="form-control" onchange="datosAsigna()">
+                                <option value=0>--Elija un opcion--</option>
+                                @foreach (var item in ViewData["TipoList"] as List<MtipoTarjeta>)
+                                {
+                                    <option value="@item.idTipo">@item.tipo</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="monto_asig" class="form-label">Monto:</label>
+                            <input type="text" class="form-control" id="monto_asig" name="monto_asig" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="interes_asig" class="form-label">Interes:</label>
+                            <input type="text" class="form-control" id="interes_asig" name="interes_asig" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="interesMin_asig" class="form-label">Interes minimo:</label>
+                            <input type="text" class="form-control" id="interesMin_asig" name="interesMin_asig" readonly>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-success" id="btnEdit" onClick="asignarTarjeta();">
+                    <i class="bi bi-check-square"></i> Asignar
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="datosTarjeta">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Datos de la tarjeta</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="clienteForm">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="nombre_datos" class="form-label">Nombres:</label>
+                            <input type="text" class="form-control" id="nombre_datos" name="nombre_datos" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="apellido_datos" class="form-label">Apellidos:</label>
+                            <input type="text" class="form-control" id="apellido_datos" name="apellido_datos" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="sexo_datos" class="form-label">Sexo:</label>
+                            <input type="text" class="form-control" id="sexo_datos" name="sexo_datos" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="fechaNacimiento_datos" class="form-label">Fecha nacimiento:</label>
+                            <input type="date" class="form-control" id="fechaNacimiento_datos" name="fechaNacimiento_datos" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="dui_datos" class="form-label">Dui:</label>
+                            <input type="text" class="form-control" id="dui_datos" name="dui_datos" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="telefono_datos" class="form-label">Telefonoo:</label>
+                            <input type="text" class="form-control" id="telefono_datos" name="telefono_datos" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="email_datos" class="form-label">Email:</label>
+                            <input type="text" class="form-control" id="email_datos" name="email_datos" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="fechaExpira_datos" class="form-label">Fecha de expiracion:</label>
+                            <input type="text" class="form-control" id="fechaExpira_datos" name="fechaExpira_datos" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="numTarjeta_datos" class="form-label">Numero de tarjetas:</label>
+                            <input type="text" class="form-control" id="numTarjeta_datos" name="numTarjeta_datos" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="tipo_datos" class="form-label">Tipo tarjeta:</label>
+                            <input type="text" class="form-control" id="tipo_datos" name="tipo_datos" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="interes_datos" class="form-label">Interes:</label>
+                            <input type="text" class="form-control" id="interes_datos" name="interes_datos" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="interesMinimo_datos" class="form-label">Interes minimo:</label>
+                            <input type="text" class="form-control" id="interesMinimo_datos" name="interesMinimo_datos" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="montoMaximo_datos" class="form-label">Monto maximo:</label>
+                            <input type="text" class="form-control" id="montoMaximo_datos" name="montoMaximo_datos" readonly>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-check-all"></i> Aceptar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal GIF-->
+<div class="modal fade" id="modalGif" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-sm">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="text-center">Cargando por favor espere</h4>
+            </div>
+            <div class="modal-body">
+                <center><div class="lds-dual-ring"></div></center>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $('#mydata').dataTable({
+        "bAutoWidth": false,
+        "oLanguage": {
+            "sSearch": "Buscador: "
+        }
+    });
+
+    $("#btnInsert").click(function () {
+        data = {
+            "nombre": $("#nombre").val(),
+            "apellido": $("#apellido").val(),
+            "sexo": $("#sexo").val(),
+            "fechaNacimiento": $("#fechaNacimiento").val(),
+            "dui": $("#dui1").val() + "-" + $("#dui2").val(),
+            "telefono": $("#telefono").val(),
+            "email": $("#email").val(),
+            "direccion": $("#direccion").val()
+        };
+        $.ajax({
+            url: "@Url.Action("InsertCliente","Cliente")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data[1])
+                if (data[1] == "") {
+                    document.getElementById('validacion').innerHTML = "";
+                    $('[name="nombre"]').val("");
+                    $('[name="apellido"]').val("");
+                    $('[name="sexo"]').val(0);
+                    $('[name="fechaNacimiento"]').val("");
+                    $('[name="dui1"]').val("");
+                    $('[name="dui2"]').val("");
+                    $('[name="telefono"]').val("");
+                    $('[name="email"]').val("");
+                    $('[name="direccion"]').val("");
+
+                    mostrarClientes();
+                    $("#insertCliente").modal('toggle');
+                    Swal.fire(
+                        'Ingreso!',
+                        data[0],
+                        'success'
+                    );
+                }else{
+                    document.getElementById('validacion').innerHTML = data[1];
+                }
+                
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    })
+
+    function mostrarClientes() {
+        $('#mydata').dataTable().fnDestroy();
+        $('tbody').empty();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("clientes","Cliente")',
+            async : false,
+            dataType : 'JSON',
+            data : {},
+            success : function (data) {
+                console.log(data);
+                $.each(data, function (key, registro) {
+                    if (registro.sexo == 0) {
+                        sexo = 'Mujer>';
+                    } else {
+                        sexo = 'Hombre';
+                    }
+                    if (registro.estado == 0) {
+                        estado = '<span class="badge rounded-pill bg-danger">Inactivo</span>';
+                    }else {
+                        estado = '<span class="badge rounded-pill bg-primary">Activo</span>';
+                    }
+                    if (registro.cantidad == 0) {
+                        cantidad = '<span class="badge rounded-pill bg-success">No posee tarjetas</span>';
+                    } else {
+                        cantidad = '<a data-toggle="modal" onClick="estado(' + registro.idCliente + ')" class="btn btn-primary btn-sm">Cuenta</a>';
+                    }
+                    $('tbody').append(
+                        '<tr>' +
+                        '<td>' + registro.nombre + '</td>' +
+                        '<td>' + registro.apellido + '</td>' +
+                        '<td>' + sexo + '</td>' +
+                        '<td>' + registro.dui + '</td>' +
+                        '<td>' + registro.telefono + '</td>' +
+                        '<td>' + registro.email + '</td>' +
+                        '<td class="text-center"><span class="badge rounded-pill bg-success">' + registro.cantidad + '</span></td>' +
+                        '<td>' + estado + '</td>' +
+                        '<td style="text-align:center;">' +
+                        '<a data-toggle="modal" onClick="editar(' + registro.idCliente + ')" class="btn btn-info btn-sm">Editar</a>' +
+                        ' ' + '<a data-toggle="modal" onClick="asignar(' + registro.idCliente + ')" class="btn btn-success btn-sm" data-codigo="">Asignar tarjeta</a>' +
+                        '</td>' +
+                        '<td>' + cantidad + '</td>' +
+                        '</tr>'
+                    );
+                });
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+            }
+        });
+
+        //Se genera la paguinacion cada ves que se ejeucuta la funcion
+        $('#mydata').dataTable({
+            "bAutoWidth": false,
+            "oLanguage": {
+                "sSearch": "Buscador: "
+            }
+        });
+    }
+
+    function editar(code) {
+        document.getElementById('validacion_edit').innerHTML = '';
+        data = {
+            "idCliente": code
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("datosCliente","Cliente")',
+            dataType: "JSON",
+            data: data,
+            success: function (data) {
+                console.log(data);
+                duiParts = data[0].dui.split('-');
+                $('[name="id_edit"]').val(code);
+                $('[name="nombre_edit"]').val(data[0].nombre);
+                $('[name="apellido_edit"]').val(data[0].apellido);
+                $('[name="sexo_edit"]').val(data[0].sexo);
+                $('[name="fechaNacimiento_edit"]').val(data[0].fechaNacimiento.slice(0, 10));
+                $('[name="dui1_edit"]').val(duiParts[0]);
+                $('[name="dui2_edit"]').val(duiParts[1]);
+                $('[name="telefono_edit"]').val(data[0].telefono);
+                $('[name="email_edit"]').val(data[0].email);
+                $('[name="direccion_edit"]').val(data[0].direccion);
+
+                $('#editCliente').modal('show');
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+        });
+    }
+
+    function editarClientes() {
+        data = {
+            "idCliente": $("#id_edit").val(),
+            "nombre": $("#nombre_edit").val(),
+            "apellido": $("#apellido_edit").val(),
+            "sexo": $("#sexo_edit").val(),
+            "fechaNacimiento": $("#fechaNacimiento_edit").val(),
+            "dui": $("#dui1_edit").val() + "-" + $("#dui2_edit").val(),
+            "telefono": $("#telefono_edit").val(),
+            "email": $("#email_edit").val(),
+            "direccion": $("#direccion_edit").val()
+        };
+
+        $.ajax({
+            url: "@Url.Action("editarCliente","Cliente")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data[1])
+                if (data[1] == "") {
+                    document.getElementById('validacion_edit').innerHTML = "";
+                    $('[name="id_edit"]').val("");
+                    $('[name="nombre_edit"]').val("");
+                    $('[name="apellido_edit"]').val("");
+                    $('[name="sexo_edit"]').val(0);
+                    $('[name="fechaNacimiento_edit"]').val("");
+                    $('[name="dui1_edit"]').val("");
+                    $('[name="dui2_edit"]').val("");
+                    $('[name="telefono_edit"]').val("");
+                    $('[name="email_edit"]').val("");
+                    $('[name="direccion_edit"]').val("");
+
+                    mostrarClientes();
+                    $("#editCliente").modal('toggle');
+                    Swal.fire(
+                        'Editar!',
+                        data[0],
+                        'success'
+                    );
+                } else {
+                    document.getElementById('validacion_edit').innerHTML = data[1];
+                }
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    }
+
+    function asignar(code) {
+        document.getElementById('validacion_asignar').innerHTML = "";
+        $('[name="id_asignar"]').val(code);
+        $('#asignarTarjeta').modal('show');
+
+    }
+
+    function datosAsigna() {
+        tipotarjeta_asig = $("#tipotarjeta_asig").val();
+        if (tipotarjeta_asig != 0) {
+            data = @Html.Raw(Json.Serialize(ViewData["TipoList"]));
+            for (var i = 0; i < data.length; i++) { 
+                if (tipotarjeta_asig == data[i].idTipo) {
+                    $('[name="monto_asig"]').val("$"+data[i].montoMaximo);
+                    $('[name="interes_asig"]').val(data[i].interes+"%");
+                    $('[name="interesMin_asig"]').val(data[i].interesMinimo + "%");
+                }
+            }
+        } else {
+            $('[name="monto_asig"]').val("");
+            $('[name="interes_asig"]').val("");
+            $('[name="interesMin_asig"]').val("");
+        }
+    }
+    //Funcion asincrona para el llamado del gif
+    function resolver1Seg() {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(asignarTarjeta());
+            }, 2000);
+        });
+    }
+
+    async function llamadoAsincrono() {
+        $('#modalGif').modal('show');
+        $("#asignarTarjeta").modal('toggle');
+        asignarTarjeta();
+        await resolver1Seg();
+    }
+
+    function asignarTarjeta() {
+        data = {
+            "idCliente": $("#id_asignar").val(),
+            "idTipo": $("#tipotarjeta_asig").val(),
+            "saldoDisponible": $("#monto_asig").val().slice(1, $("#monto_asig").val().length),
+        };
+        $.ajax({
+            url: "@Url.Action("insertTarjeta","Tarjeta")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                console.log(JSON.parse(data[2]));
+                if (data[1] == "") {
+                    document.getElementById('validacion_asignar').innerHTML = "";
+                    $('[name="idCliente"]').val("");
+                    $('[name="idTipo"]').val("---");
+                    $('[name="saldoDisponible"]').val("");
+                    $('[name="interes_asig"]').val("");
+                    $('[name="interesMin_asig"]').val("");
+                    mostrarClientes();
+                    $("#asignarTarjeta").modal('toggle');
+                    Swal.fire(
+                        'Ingreso!',
+                        data[0],
+                        'success'
+                    ).then(() => { 
+                        if (data[2] != "") {
+                            datosTarjeta(JSON.parse(data[2]));
+                        }
+                    });
+                } else {
+                    document.getElementById('validacion_asignar').innerHTML = data[1];
+                }
+                
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    }
+
+    function datosTarjeta(data){
+        if (data[0].sexo == 0) {
+            sexo = 'Mujer';
+        }else{
+            sexo = 'Hombre';
+        }
+
+        $('[name="nombre_datos"]').val(data[0].nombre);
+        $('[name="apellido_datos"]').val(data[0].apellido);
+        $('[name="sexo_datos"]').val(sexo);
+        $('[name="fechaNacimiento_datos"]').val(data[0].fechaNacimiento.slice(0, 10));
+        $('[name="dui_datos"]').val(data[0].dui);
+        $('[name="telefono_datos"]').val(data[0].telefono);
+        $('[name="email_datos"]').val(data[0].email);
+        $('[name="numTarjeta_datos"]').val(data[0].numeroTarjeta);
+        $('[name="fechaExpira_datos"]').val(data[0].fechaExpira);
+        $('[name="tipo_datos"]').val(data[0].tipo);
+        $('[name="interes_datos"]').val(data[0].interes + "%");
+        $('[name="interesMinimo_datos"]').val(data[0].interesMinimo + "%");
+        $('[name="montoMaximo_datos"]').val("$" + data[0].montoMaximo);
+
+        $('#datosTarjeta').modal('show');
+    }
+
+
+</script> 

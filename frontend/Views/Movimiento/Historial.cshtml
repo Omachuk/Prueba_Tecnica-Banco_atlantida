@@ -1,0 +1,157 @@
+﻿@model frontend.Models.Mmovimiento
+
+@{
+    ViewData["Title"] = "Historial";
+}
+
+<br />
+<h2 class="text-center">Historial de movimientos</h2>
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        <form>
+            <div class="alert alert-danger" id="validacion" role="alert" style="display: none;">
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="idCliente" class="form-label">Nombres:</label>
+                    <select id="idCliente" name="idCliente" class="form-control" onchange="datosCliente()">
+                        <option value=0>--Elija un cliente--</option>
+                        @foreach (var item in ViewData["clientesList"] as List<Mclientes>)
+                        {
+                            <option value="@item.idCliente">@item.nombre @item.apellido</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="dui" class="form-label">Dui:</label>
+                    <input type="text" class="form-control" id="dui" name="dui" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="idTarjeta" class="form-label">Numero de tarjeta:</label>
+                    <select id="idTarjeta" name="idTarjeta" class="form-control" onchange="datosTarjeta()">
+                        <option value=0>--Elija una tarjeta--</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="mes" class="form-label">Mes:</label>
+                    <input type="month" class="form-control" id="mes" name="mes" value="@DateTime.Today.Month">
+                </div>
+
+                <div class="col-md-2">
+                    <label for="Accion" class="form-label">Accion:</label>
+                    <a onclick="mostrarHistorial();" class="btn btn-outline-primary form-control"><i class="bi bi-check-all"></i> Aceptar</a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <br /><br /><br /><br /><br />
+    <div class="col-md-12">
+        <table class="table table-bordered table-hover" id="mydata">
+            <thead>
+                <tr>
+                    <th class="text-center">
+                        Numero de tarjeta
+                    </th>
+                    <th class="text-center">
+                        Monto
+                    </th>
+                    <th class="text-center">
+                        Fecha de compra
+                    </th>
+                    <th class="text-center">
+                        Descripcion
+                    </th>
+                    <th class="text-center">
+                        Tipo
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function datosCliente() {
+        idCliente = $("#idCliente").val();
+        if (idCliente != 0) {
+            data = @Html.Raw(Json.Serialize(ViewData["clientesList"]));
+            for (var i = 0; i < data.length; i++) {
+                if (idCliente == data[i].idCliente) {
+                    $('[name="dui"]').val(data[i].dui);
+                }
+            }
+            tarjetas = @Html.Raw(Json.Serialize(ViewData["tarjetasList"]));
+            $('#idTarjeta').empty();
+            $('#idTarjeta').append("<option value=0>--Elija una tarjeta--</option>");
+            for (var i = 0; i < tarjetas.length; i++) {
+                if (idCliente == data[i].idCliente) {
+                    $('#idTarjeta').append("<option value=" + tarjetas[i].idTarjeta + ">" + tarjetas[i].numeroTarjeta + "</option>");
+                }
+            }
+        } else {
+            $('[name="dui"]').val("");
+        }
+    }
+
+    function mostrarHistorial() {
+        data = {
+            "idTarjeta": $("#idTarjeta").val(),
+            "mes": $("#mes").val(),
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("getHistorial","Movimiento")',
+            async: false,
+            dataType: 'JSON',
+            data: data,
+            success: function (data) {
+                console.log(data);
+                if (data[0] == "") {
+
+                    $('#mydata').dataTable().fnDestroy();
+                    $('tbody').empty();
+                    document.getElementById('validacion').innerHTML = "";
+                    $("#validacion").hide();
+
+                    datos = JSON.parse(data[1]);
+                    $.each(datos, function (key, registro) {
+                        if (registro.tipoMovimiento == 1) {
+                            tipoMovimiento = '<span class="badge rounded-pill bg-primary">Compra</span>';
+                        } else {
+                            tipoMovimiento = '<span class="badge rounded-pill bg-success">Pago</span>';
+                        }
+                        $('tbody').append(
+                            '<tr>' +
+                            '<td>' + registro.numeroTarjeta + '</td>' +
+                            '<td>$' + registro.monto + '</td>' +
+                            '<td>' + registro.fechaCompra.slice(0, 10) + '</td>' +
+                            '<td>' + registro.descripcion + '</td>' +
+                            '<td>' + tipoMovimiento + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    document.getElementById('validacion').innerHTML = data[0];
+                    $("#validacion").show();
+                }
+                
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+            }
+        });
+    }
+
+</script> 

@@ -1,0 +1,424 @@
+﻿@model IEnumerable<frontend.Models.MtipoTarjeta>
+
+@{
+    ViewData["Title"] = "Tipo de tarjeta";
+}
+<br />
+<h2 class="text-center">Lista de tipos de tarjeta</h2>
+<br />
+
+<p>
+    <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#insertTipoTarjeta">
+        <i class="bi bi-clipboard2-plus"></i> Ingresar nuevo tipo tarjeta
+    </a>
+</p>
+<table class="table table-bordered table-hover" id="mydata">
+    <thead>
+        <tr>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.tipo)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.nombre)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.montoMaximo)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.descripcion)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.fechaIngreso)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.estado)
+            </th>
+            <th class="text-center">
+                Acción
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in ViewData["TipoList"] as List<MtipoTarjeta>)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.tipo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.nombre)
+                </td>
+                <td>
+                    $ @Html.DisplayFor(modelItem => item.montoMaximo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.descripcion)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.fechaIngreso)
+                </td>
+                <td class="text-center">
+                    @if (item.estado == 0)
+                    {
+                        <span class="badge rounded-pill bg-danger">Inhabilitado</span>
+                    }
+                    else if (item.estado == 1)
+                    {
+                        <span class="badge rounded-pill bg-primary">Activo</span>
+                    }
+                </td>
+                <td style="text-align:center;">
+                    <a data-toggle="modal" onClick="editar(@Html.DisplayFor(modelItem => item.idTipo))" class="btn btn-info btn-sm item_edit">Editar</a>
+                    <a data-toggle="modal" onClick="inhabilitar(@Html.DisplayFor(modelItem => item.idTipo))" class="btn btn-danger btn-sm item_delete" data-codigo="">Inhabilitar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!--Modal para insertar los intereses-->
+<div class="modal" id="insertTipoTarjeta">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Ingresar nuevo tipo tarjeta</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <div class="mb-12">
+                        <div id="validacion" style="color:red"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipoInteres" class="form-label">Tipo interes:</label>
+                        <select id="tipoInteres" name="tipoInteres" class="form-control">
+                            @foreach (var item in ViewData["InteresList"] as List<Minteres>)
+                            {
+                                <option value="@item.idInteres">@item.nombre (@item.interes%)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo tarjeta:</label>
+                        <input type="text" class="form-control" id="tipo" name="tipo" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="montoMaximo" class="form-label">Monto maximo:</label>
+                        <input type="number" class="form-control" id="montoMaximo" name="montoMaximo" required min="0">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripcion:</label>
+                        <textarea type="text" class="form-control" id="descripcion" name="descripcion" required></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="btnInsert">
+                    <i class="bi bi-plus-circle"></i> Ingresar
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--Modal para editar el tipo tarjeta-->
+<div class="modal" id="editTipoTarjeta">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Editar nuevo tipo tarjeta</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <div class="mb-12">
+                        <input type="hidden" name="id_edit" id="id_edit" class="form-control">
+                        <div id="validacion_edit" style="color:red"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipoInteres_edit" class="form-label">Tipo interes:</label>
+                        <select id="tipoInteres_edit" name="tipoInteres_edit" class="form-control">
+                            @foreach (var item in ViewData["InteresList"] as List<Minteres>)
+                            {
+                                <option value="@item.idInteres">@item.nombre (@item.interes%)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo_edit" class="form-label">Tipo tarjeta:</label>
+                        <input type="text" class="form-control" id="tipo_edit" name="tipo_edit" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="montoMaximo_edit" class="form-label">Monto maximo:</label>
+                        <input type="number" class="form-control" id="montoMaximo_edit" name="montoMaximo_edit" required min="0">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion_edit" class="form-label">Descripcion:</label>
+                        <textarea type="text" class="form-control" id="descripcion_edit" name="descripcion_edit" required></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-success" id="btnEdit" onClick="editarTipoTarjeta();">
+                    <i class="bi bi-send-check"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Modal para inhabilitar -->
+<div class="modal" id="inhabilitarTipoTarjeta">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Inhabilitar tipo de tarjeta</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <input type="hidden" name="id_inhabilitar" id="id_inhabilitar" class="form-control">
+                <h5>Esta seguro de inhabilitar este tipo de tarjeta</h5>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" id="btnInhabilitar" onClick="inhabilitarTipoTarjeta();">
+                    <i class="bi bi-check-circle"></i> Aceptar
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('#mydata').dataTable({
+        "bAutoWidth": false,
+        "oLanguage": {
+            "sSearch": "Buscador: "
+        }
+    });
+
+    $("#btnInsert").click(function () {
+        data = {
+            "idInteres": $("#tipoInteres").val(),
+            "tipo": $("#tipo").val(),
+            "montoMaximo": $("#montoMaximo").val(),
+            "descripcion": $("#descripcion").val(),
+        };
+        console.log(data);
+        $.ajax({
+            url: "@Url.Action("insertTipoTarjeta","TipoInteres")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data[1])
+                if (data[1] == "") {
+                    document.getElementById('validacion').innerHTML = "";
+                    $('[name="tipo"]').val("");
+                    $('[name="montoMaximo"]').val("");
+                    $('[name="descripcion"]').val("");
+
+                    mostrarTipoTarjeta();
+                    $("#insertTipoTarjeta").modal('toggle');
+                    Swal.fire(
+                        'Ingreso!',
+                        data[0],
+                        'success'
+                    );
+                } else {
+                    document.getElementById('validacion').innerHTML = data[1];
+                }
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    })
+
+    function mostrarTipoTarjeta() {
+        $('#mydata').dataTable().fnDestroy();
+        $('tbody').empty();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("tiposTarjetas","TipoInteres")',
+            async: false,
+            dataType: 'JSON',
+            data: {},
+            success: function (data) {
+                console.log(data);
+                $.each(data, function (key, registro) {
+                    if (registro.estado == 0) {
+                        estado = '<span class="badge rounded-pill bg-danger">Inhabilitado</span>';
+                    } else {
+                        estado = '<span class="badge rounded-pill bg-primary">Activo</span>';
+                    }
+                    $('tbody').append(
+                        '<tr>' +
+                        '<td>' + registro.tipo + '</td>' +
+                        '<td>' + registro.nombre + '</td>' +
+                        '<td>$ ' + registro.montoMaximo + '</td>' +
+                        '<td>' + registro.descripcion + '</td>' +
+                        '<td>' + formaroFecha(registro.fechaIngreso) + '</td>' +
+                        '<td class="text-center">' + estado + '</td>' +
+                        '<td style="text-align:center;">' +
+                        '<a data-toggle="modal" onClick="editar(' + registro.idTipo + ')" class="btn btn-info btn-sm item_edit" id=" ">Editar</a>' +
+                        ' ' + '<a data-toggle="modal" onClick="inhabilitar(' + registro.idTipo + ')" class="btn btn-danger btn-sm item_delete" data-codigo="">Inhabilitar</a>' +
+                        '</td>' +
+                        '</tr>'
+                    );
+                });
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+            }
+        });
+
+        //Se genera la paguinacion cada ves que se ejeucuta la funcion
+        $('#mydata').dataTable({
+            "bAutoWidth": false,
+            "oLanguage": {
+                "sSearch": "Buscador: "
+            }
+        });
+    }
+
+    function editar(code) {
+        document.getElementById('validacion_edit').innerHTML = '';
+        data = {
+            "idTipo": code
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("datosTipoTarjeta","TipoInteres")',
+            dataType: "JSON",
+            data: data,
+            success: function (data) {
+                console.log(data);
+                $('[name="id_edit"]').val(code);
+                $('[name="tipoInteres_edit"]').val(data[0].idInteres);
+                $('[name="tipo_edit"]').val(data[0].tipo);
+                $('[name="montoMaximo_edit"]').val(data[0].montoMaximo);
+                $('[name="descripcion_edit"]').val(data[0].descripcion);
+
+                $('#editTipoTarjeta').modal('show');
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+        });
+    }
+
+    function editarTipoTarjeta() {
+        data = {
+            "idTipo": $("#id_edit").val(),
+            "idInteres": $("#tipoInteres_edit").val(),
+            "tipo": $("#tipo_edit").val(),
+            "montoMaximo": $("#montoMaximo_edit").val(),
+            "descripcion": $("#descripcion_edit").val()
+        };
+
+        $.ajax({
+            url: "@Url.Action("editTipoTarjeta","TipoInteres")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data[1])
+                if (data[1] == "") {
+                    document.getElementById('validacion_edit').innerHTML = "";
+                    $('[name="id_edit"]').val("");
+                    $('[name="tipoInteres_edit"]').val("");
+                    $('[name="tipo_edit"]').val("");
+                    $('[name="montoMaximo_edit"]').val("");
+                    $('[name="descripcion_edit"]').val("");
+
+                    mostrarTipoTarjeta();
+                    $("#editTipoTarjeta").modal('toggle');
+                    Swal.fire(
+                        'Editar!',
+                        data[0],
+                        'success'
+                    );
+                } else {
+                    document.getElementById('validacion_edit').innerHTML = data[1];
+                }
+
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    }
+
+    function inhabilitar(code) {
+        $('[name="id_inhabilitar"]').val(code);
+        $('#inhabilitarTipoTarjeta').modal('show');
+
+    }
+
+    function inhabilitarTipoTarjeta() {
+        data = {
+            "idTipo": $("#id_inhabilitar").val(),
+        };
+
+        $.ajax({
+            url: "@Url.Action("inhabilitarTipoTarjeta","TipoInteres")",
+            type: "POST",
+            data: data,
+            dataType: "JSON",
+            success: function (data) {
+                $('[name="id_inhabilitar"]').val("");
+                mostrarTipoTarjeta();
+                $("#inhabilitarTipoTarjeta").modal('toggle');
+                Swal.fire(
+                    'Inhabilitar!',
+                    data,
+                    'success'
+                );
+            },
+            error: function (data) {
+                var a = JSON.stringify(data['responseText']);
+                alert(a);
+                this.disabled = false;
+            }
+
+        });
+    }
+</script>
